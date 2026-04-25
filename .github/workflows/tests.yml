@@ -1,0 +1,48 @@
+name: OTT Pipeline Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ott_pipeline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install pytest pytest-html requests psycopg2-binary selenium webdriver-manager
+
+      - name: Set up database
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d ott_pipeline -c "CREATE TABLE raw_content (title TEXT, rating NUMERIC, platform TEXT, loaded_at TIMESTAMP);" -c "INSERT INTO raw_content VALUES ('KGF Chapter 2', 8.2, 'Netflix', NOW()), ('RRR', 7.8, 'Prime Video', NOW()), ('Kantara', 8.5, 'JioHotstar', NOW()), ('Pushpa', 7.6, 'SonyLIV', NOW());"
+
+      - name: Run API and DB tests
+        run: pytest tests/test_api.py tests/test_database.py -v --html=reports/test_report.html --self-contained-html
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+          DB_PASSWORD: postgres
