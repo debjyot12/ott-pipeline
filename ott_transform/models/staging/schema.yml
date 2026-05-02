@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: stg_raw_content
+    description: "Cleaned staging layer from raw_content table"
+    columns:
+      - name: title
+        description: "Movie or show title"
+        tests:
+          - not_null
+
+      - name: platform
+        description: "OTT platform name"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Netflix', 'Prime Video', 'JioHotstar', 'SonyLIV']
+
+      - name: rating
+        description: "TMDB rating (0–10)"
+        tests:
+          - not_null

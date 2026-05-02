@@ -3,3 +3,6 @@ __pycache__/
 .pytest_cache/
 data/
 .env
+# dbt
+ott_transform/target/
+ott_transform/logs/

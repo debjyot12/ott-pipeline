@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: platform_summary
+    description: "Aggregated stats per OTT platform"
+    columns:
+      - name: platform
+        description: "OTT platform name"
+        tests:
+          - not_null
+          - unique
+
+  - name: top_rated_content
+    description: "Titles with rating >= 7.5"
+    columns:
+      - name: title
+        description: "Movie or show title"
+        tests:
+          - not_null
+
+      - name: rating
+        description: "Rating for this title on this platform"
+        tests:
+          - not_null
